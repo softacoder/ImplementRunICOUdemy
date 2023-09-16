@@ -57,10 +57,30 @@ contract CryptosICO is Cryptos{
             return State.halted;
         }else if(block.timestamp < saleStart){
             return State.beforeStart;
-        }else if(block.timestamp >= saleStart && block.timestamp <= saleEnd)
-    } return State.running;
+        }else if(block.timestamp >= saleStart && block.timestamp <= saleEnd){
+     return State.running;
 }else{
     return State.afterEnd;
 }
+}
 
-// code until lesson 104.
+function invest() payable public returns(bool){
+    icoState = getCurrentState();
+    require(icoState == State.running);
+
+    require(msg.value >= minInvestment && msg.value <= maxInvestment);
+    require(raisedAmount <= hardCap);
+
+    uint tokens = msg.sender / tokenPrice;
+
+    balances[msg.sender] += tokens;
+    balances[founder] -= tokens;
+    deposit.transfer(msg.value);
+    emit Invest(msg.sender, msg.value, tokens);
+
+    return true;
+}
+receive() payable external{
+    invest();
+}
+}
