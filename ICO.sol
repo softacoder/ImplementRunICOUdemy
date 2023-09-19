@@ -42,7 +42,7 @@ contract Cryptos is ERC20Interface{
     }
 
 
-    function transfer(address to, uint tokens) public override returns (bool success){
+    function transfer(address to, uint tokens) public virtual override returns (bool success){
         require(balances[msg.sender] >= tokens);
 
     balances[to] += tokens;
@@ -70,7 +70,7 @@ contract Cryptos is ERC20Interface{
 
     }
 
-    function transferFrom(address from, address to, uint tokens) public override returns (bool success){
+    function transferFrom(address from, address to, uint tokens) public virtual override returns (bool success){
         require (allowed[from][to] >= tokens);
         require (balances[from] >= tokens);
 
@@ -157,4 +157,23 @@ function invest() payable public returns(bool){
 receive() payable external{
     invest();
 }
+
+function transfer(address to, uint tokens) public override returns(bool success){
+    require(block.timestamp > tokenTradeStart);
+    Cryptos.transfer(to, tokens);
+    return true;
+}
+
+    function transferFrom(address from, address to, uint tokens) public override returns (bool success){
+        require(block.timestamp > tokenTradeStart);
+    Cryptos.transferFrom(from, to, tokens);
+    return true;
+    }
+
+    function burn() public returns(bool){
+        icoState = getCurrentState();
+        require(icoState == State.afterEnd);
+        balances[founder] = 0;
+        return true;
+    }
 }
